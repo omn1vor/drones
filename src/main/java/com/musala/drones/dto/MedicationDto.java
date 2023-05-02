@@ -1,8 +1,6 @@
-package com.musala.drones.model;
+package com.musala.drones.dto;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -12,14 +10,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
-public class Medication {
-    @Id @Pattern(regexp = "[A-Z0-9_]+") @Size(max = 100, min = 1) @Column(length = 100)
+public class MedicationDto {
+    @Pattern(regexp = "[A-Z0-9_]+") @Size(max = 100, min = 1)
     String code;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Pattern(regexp = "[\\w-]+") @NotNull
     String name;
-    @Min(0)
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Min(1)
     int weightGrams;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     String image;
 }
