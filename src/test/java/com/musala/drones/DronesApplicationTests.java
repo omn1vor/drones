@@ -4,7 +4,6 @@ import com.musala.drones.dto.AddMedicationsRowRequestDto;
 import com.musala.drones.dto.DroneDto;
 import com.musala.drones.model.DroneModel;
 import com.musala.drones.model.DroneState;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

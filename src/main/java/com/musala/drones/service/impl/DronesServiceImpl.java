@@ -118,10 +118,6 @@ public class DronesServiceImpl implements DronesService {
         return modelMapper.map(row, LoadedMedicationsRowDto.class);
     }
 
-    private Medication medicationFromDto(MedicationDto medicationDto) {
-        return modelMapper.map(medicationDto, Medication.class);
-    }
-
     private LoadedMedicationsRow loadedMedicationRowsFromDto(Drone drone, AddMedicationsRowRequestDto dto) {
         Medication medication = medicationRepository.findById(dto.getCode())
                 .orElseThrow(() -> new MedicationNotFoundException("Medicine with ID %s is not registered"

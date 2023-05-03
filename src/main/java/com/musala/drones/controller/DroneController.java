@@ -1,7 +1,9 @@
 package com.musala.drones.controller;
 
-import com.musala.drones.dto.*;
-import com.musala.drones.model.LoadedMedicationsRow;
+import com.musala.drones.dto.AddMedicationsRowRequestDto;
+import com.musala.drones.dto.DroneBatteryInfoDto;
+import com.musala.drones.dto.DroneDto;
+import com.musala.drones.dto.LoadedMedicationsRowDto;
 import com.musala.drones.service.DronesService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
