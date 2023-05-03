@@ -1,13 +1,14 @@
 package com.musala.drones.service.impl;
 
 import com.musala.drones.dto.*;
+import com.musala.drones.exception.DroneAlreadyExistsException;
 import com.musala.drones.exception.DroneStateException;
 import com.musala.drones.exception.MedicationNotFoundException;
 import com.musala.drones.model.Drone;
 import com.musala.drones.model.DroneState;
 import com.musala.drones.model.LoadedMedicationsRow;
 import com.musala.drones.model.Medication;
-import com.musala.drones.service.DronesService;
+import com.musala.drones.service.DroneService;
 import com.musala.drones.service.storage.DroneRepository;
 import com.musala.drones.service.storage.MedicationRepository;
 import jakarta.transaction.Transactional;
@@ -20,14 +21,14 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @Service
-public class DronesServiceImpl implements DronesService {
+public class DroneServiceImpl implements DroneService {
 
-    DroneRepository droneRepository;
-    MedicationRepository medicationRepository;
-    ModelMapper modelMapper;
+    private final DroneRepository droneRepository;
+    private final MedicationRepository medicationRepository;
+    private final ModelMapper modelMapper;
 
-    public DronesServiceImpl(DroneRepository droneRepository, MedicationRepository medicationRepository,
-                             ModelMapper modelMapper) {
+    public DroneServiceImpl(DroneRepository droneRepository, MedicationRepository medicationRepository,
+                            ModelMapper modelMapper) {
         this.droneRepository = droneRepository;
         this.medicationRepository = medicationRepository;
         this.modelMapper = modelMapper;
@@ -47,7 +48,7 @@ public class DronesServiceImpl implements DronesService {
     @Override
     public void registerDrone(DroneDto droneDto) {
         if (droneRepository.existsById(droneDto.getSerialNumber())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            throw new DroneAlreadyExistsException(
                     "Drone with ID %s is already registered".formatted(droneDto.getSerialNumber()));
         }
 

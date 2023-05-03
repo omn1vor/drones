@@ -4,7 +4,7 @@ import com.musala.drones.dto.*;
 
 import java.util.List;
 
-public interface DronesService {
+public interface DroneService {
     List<DroneDto> getDrones();
 
     DroneDto getDrone(String serialNumber);

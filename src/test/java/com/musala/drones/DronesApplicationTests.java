@@ -2,6 +2,7 @@ package com.musala.drones;
 
 import com.musala.drones.dto.AddMedicationsRowRequestDto;
 import com.musala.drones.dto.DroneDto;
+import com.musala.drones.dto.MedicationDto;
 import com.musala.drones.model.DroneModel;
 import com.musala.drones.model.DroneState;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
@@ -16,6 +18,7 @@ import java.util.List;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@ActiveProfiles("dev")
 class DronesApplicationTests {
 
 	@Autowired
@@ -72,6 +75,19 @@ class DronesApplicationTests {
 	@Test
 	void registerIncorrectDrone() {
 		String serial = "1l2k31j";
+		DroneDto droneDto = new DroneDto(serial, DroneModel.LIGHTWEIGHT, 999,
+				55, DroneState.DELIVERING);
+		client.post().uri("/drones")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.body(Mono.just(droneDto), DroneDto.class)
+				.exchange()
+				.expectStatus().isBadRequest();
+	}
+
+	@Test
+	void registerExistingDrone() {
+		String serial = "MD-001";
 		DroneDto droneDto = new DroneDto(serial, DroneModel.LIGHTWEIGHT, 999,
 				55, DroneState.DELIVERING);
 		client.post().uri("/drones")
@@ -153,4 +169,41 @@ class DronesApplicationTests {
                 .expectBody()
                 .jsonPath("$.batteryCapacity").isEqualTo(25);
 	}
+
+	@Test
+	@DirtiesContext
+	void addCorrectMedication() {
+		MedicationDto medicationDto = new MedicationDto("IBUPROFEN", "Ibuprofen",
+				10, "url");
+		client.post().uri("/medications")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(Mono.just(medicationDto), MedicationDto.class)
+                .exchange()
+				.expectStatus().isOk();
+	}
+
+	@Test
+	void addIncorrectMedication() {
+		MedicationDto medicationDto = new MedicationDto("not-really-a-code", "Some name",
+				10, "url");
+		client.post().uri("/medications")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.body(Mono.just(medicationDto), MedicationDto.class)
+				.exchange()
+				.expectStatus().isBadRequest();
+	}
+
+	@Test
+	void getMedications() {
+		client.get().uri("/medications")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$").isArray()
+                .jsonPath("$").isNotEmpty()
+                .jsonPath("$[0].code").isNotEmpty();
+	}
+
 }

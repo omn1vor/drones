@@ -15,14 +15,11 @@ public class MedicationDto {
     @Pattern(regexp = "[A-Z0-9_]+") @Size(max = 100, min = 1)
     String code;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Pattern(regexp = "[\\w-]+") @NotNull
     String name;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Min(1)
     int weightGrams;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     String imageUrl;
 }

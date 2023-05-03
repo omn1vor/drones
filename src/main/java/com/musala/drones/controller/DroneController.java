@@ -4,7 +4,7 @@ import com.musala.drones.dto.AddMedicationsRowRequestDto;
 import com.musala.drones.dto.DroneBatteryInfoDto;
 import com.musala.drones.dto.DroneDto;
 import com.musala.drones.dto.LoadedMedicationsRowDto;
-import com.musala.drones.service.DronesService;
+import com.musala.drones.service.DroneService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
@@ -17,46 +17,46 @@ import java.util.List;
 @RequestMapping("/drones")
 @Validated
 public class DroneController {
-    DronesService dronesService;
+    private final DroneService droneService;
 
-    public DroneController(DronesService dronesService) {
-        this.dronesService = dronesService;
+    public DroneController(DroneService droneService) {
+        this.droneService = droneService;
     }
 
     @GetMapping
     public List<DroneDto> getDrones() {
-        return dronesService.getDrones();
+        return droneService.getDrones();
     }
 
     @GetMapping("/{serialNumber}")
     public DroneDto getDrone(@PathVariable @Size(max = 100, min = 1) String serialNumber) {
-        return dronesService.getDrone(serialNumber);
+        return droneService.getDrone(serialNumber);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void registerDrone(@Valid @RequestBody DroneDto droneDto) {
-        dronesService.registerDrone(droneDto);
+        droneService.registerDrone(droneDto);
     }
 
     @PostMapping("/{serialNumber}/load")
     public DroneDto loadMedications(@PathVariable @Size(max = 100, min = 1) String serialNumber,
                                     @Valid @RequestBody List<AddMedicationsRowRequestDto> addMedicationsRowRequestDtos) {
-        return dronesService.loadMedications(serialNumber, addMedicationsRowRequestDtos);
+        return droneService.loadMedications(serialNumber, addMedicationsRowRequestDtos);
     }
 
     @GetMapping("/{serialNumber}/medications")
     public List<LoadedMedicationsRowDto> getMedications(@PathVariable @Size(max = 100, min = 1) String serialNumber) {
-        return dronesService.getMedications(serialNumber);
+        return droneService.getMedications(serialNumber);
     }
 
     @GetMapping("/available")
     public List<DroneDto> getAvailableDrones() {
-        return dronesService.getAvailableDrones();
+        return droneService.getAvailableDrones();
     }
 
     @GetMapping("/{serialNumber}/battery")
     public DroneBatteryInfoDto getBatteryLevel(@PathVariable @Size(max = 100, min = 1) String serialNumber) {
-        return dronesService.getBatteryLevel(serialNumber);
+        return droneService.getBatteryLevel(serialNumber);
     }
 }
