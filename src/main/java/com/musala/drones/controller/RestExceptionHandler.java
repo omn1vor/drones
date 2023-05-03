@@ -18,7 +18,7 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler({ConstraintViolationException.class, DroneOverloadedException.class, DroneStateException.class,
-    DroneAlreadyExistsException.class})
+    DroneAlreadyExistsException.class, DroneBatteryTooLowException.class})
     public ResponseEntity<Object> handleBadRequestException(RuntimeException e, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(e.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);

@@ -5,6 +5,7 @@ import com.musala.drones.dto.DroneBatteryInfoDto;
 import com.musala.drones.dto.DroneDto;
 import com.musala.drones.dto.LoadedMedicationsRowDto;
 import com.musala.drones.service.DroneService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/drones")
 @Validated
+@Tag(name = "Drones")
 public class DroneController {
     private final DroneService droneService;
 

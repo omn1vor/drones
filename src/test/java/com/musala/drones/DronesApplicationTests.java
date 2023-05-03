@@ -5,6 +5,7 @@ import com.musala.drones.dto.DroneDto;
 import com.musala.drones.dto.MedicationDto;
 import com.musala.drones.model.DroneModel;
 import com.musala.drones.model.DroneState;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -133,7 +134,27 @@ class DronesApplicationTests {
 				.accept(MediaType.APPLICATION_JSON)
 				.body(Mono.just(medications), AddMedicationsRowRequestDto.class)
 				.exchange()
-				.expectStatus().isBadRequest();
+				.expectStatus().isBadRequest()
+				.expectBody()
+				.jsonPath("$.message").value(Matchers.containsString("state"));
+	}
+
+	@Test
+	void loadDroneWithLowBattery() {
+		String serial = "SM-001";
+
+        List<AddMedicationsRowRequestDto> medications = List.of(
+				new AddMedicationsRowRequestDto("ASPIRIN", 1)
+		);
+
+		client.post().uri("/drones/%s/load".formatted(serial))
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.body(Mono.just(medications), AddMedicationsRowRequestDto.class)
+				.exchange()
+				.expectStatus().isBadRequest()
+				.expectBody()
+				.jsonPath("$.message").value(Matchers.containsString("battery"));
 	}
 
 	@Test
@@ -167,7 +188,7 @@ class DronesApplicationTests {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.batteryCapacity").isEqualTo(25);
+                .jsonPath("$.batteryCapacity").isEqualTo(24);
 	}
 
 	@Test

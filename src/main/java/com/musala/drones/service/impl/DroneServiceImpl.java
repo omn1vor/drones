@@ -1,5 +1,6 @@
 package com.musala.drones.service.impl;
 
+import com.musala.drones.config.DroneConfig;
 import com.musala.drones.dto.*;
 import com.musala.drones.exception.DroneAlreadyExistsException;
 import com.musala.drones.exception.DroneStateException;
@@ -25,12 +26,14 @@ public class DroneServiceImpl implements DroneService {
 
     private final DroneRepository droneRepository;
     private final MedicationRepository medicationRepository;
+    private final DroneConfig droneConfig;
     private final ModelMapper modelMapper;
 
     public DroneServiceImpl(DroneRepository droneRepository, MedicationRepository medicationRepository,
-                            ModelMapper modelMapper) {
+                            DroneConfig droneConfig, ModelMapper modelMapper) {
         this.droneRepository = droneRepository;
         this.medicationRepository = medicationRepository;
+        this.droneConfig = droneConfig;
         this.modelMapper = modelMapper;
     }
 
@@ -60,9 +63,10 @@ public class DroneServiceImpl implements DroneService {
     @Transactional
     public DroneDto loadMedications(String serialNumber, List<AddMedicationsRowRequestDto> addMedicationsRowRequestDtos) {
         Drone drone = getDroneBySerialNumber(serialNumber);
-        if (drone.getState() != DroneState.IDLE) {
-            throw new DroneStateException("Drone %s is not in IDLE state. Loading is not possible");
-        }
+
+        checkIfStateSuitableForLoading(drone);
+        checkIfBatteryLevelSuitableForLoading(drone);
+
         drone.setState(DroneState.LOADING);
         droneRepository.save(drone);
 
@@ -99,6 +103,20 @@ public class DroneServiceImpl implements DroneService {
         return droneRepository.findById(serialNumber)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Drone with ID %s is not registered".formatted(serialNumber)));
+    }
+
+    private void checkIfStateSuitableForLoading(Drone drone) {
+        if (drone.getState() != DroneState.IDLE) {
+            throw new DroneStateException("Drone %s is not in IDLE state. Loading is not possible"
+                    .formatted(drone.getSerialNumber()));
+        }
+    }
+
+    private void checkIfBatteryLevelSuitableForLoading(Drone drone) {
+        if (drone.getBatteryCapacity() < droneConfig.getMinBatteryCapacityForLoading()) {
+            throw new DroneStateException("Drone %s has low battery. Loading is not possible"
+                    .formatted(drone.getSerialNumber()));
+        }
     }
 
     private Drone droneFromDto(DroneDto droneDto) {

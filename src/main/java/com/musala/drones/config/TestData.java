@@ -55,7 +55,7 @@ public class TestData implements ApplicationRunner {
                         DroneState.IDLE),
                 new Drone("MD-001a", DroneModel.MIDDLEWEIGHT, 300, 75,
                         DroneState.IDLE),
-                new Drone("SM-001", DroneModel.LIGHTWEIGHT, 100, 25,
+                new Drone("SM-001", DroneModel.LIGHTWEIGHT, 100, 24,
                         DroneState.IDLE)
         );
 
