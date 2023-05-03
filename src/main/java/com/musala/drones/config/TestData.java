@@ -8,7 +8,6 @@ import com.musala.drones.service.storage.DroneRepository;
 import com.musala.drones.service.storage.MedicationRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
