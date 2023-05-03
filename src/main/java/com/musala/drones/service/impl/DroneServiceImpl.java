@@ -1,6 +1,6 @@
 package com.musala.drones.service.impl;
 
-import com.musala.drones.config.DroneConfig;
+import com.musala.drones.config.DroneBatteryConfig;
 import com.musala.drones.dto.*;
 import com.musala.drones.exception.DroneAlreadyExistsException;
 import com.musala.drones.exception.DroneStateException;
@@ -26,14 +26,14 @@ public class DroneServiceImpl implements DroneService {
 
     private final DroneRepository droneRepository;
     private final MedicationRepository medicationRepository;
-    private final DroneConfig droneConfig;
+    private final DroneBatteryConfig droneBatteryConfig;
     private final ModelMapper modelMapper;
 
     public DroneServiceImpl(DroneRepository droneRepository, MedicationRepository medicationRepository,
-                            DroneConfig droneConfig, ModelMapper modelMapper) {
+                            DroneBatteryConfig droneBatteryConfig, ModelMapper modelMapper) {
         this.droneRepository = droneRepository;
         this.medicationRepository = medicationRepository;
-        this.droneConfig = droneConfig;
+        this.droneBatteryConfig = droneBatteryConfig;
         this.modelMapper = modelMapper;
     }
 
@@ -113,7 +113,7 @@ public class DroneServiceImpl implements DroneService {
     }
 
     private void checkIfBatteryLevelSuitableForLoading(Drone drone) {
-        if (drone.getBatteryCapacity() < droneConfig.getMinBatteryCapacityForLoading()) {
+        if (drone.getBatteryCapacity() < droneBatteryConfig.getMinCapacityForLoading()) {
             throw new DroneStateException("Drone %s has low battery. Loading is not possible"
                     .formatted(drone.getSerialNumber()));
         }

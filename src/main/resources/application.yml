@@ -4,8 +4,9 @@ spring:
   datasource:
     url: jdbc:h2:mem:drones
 drone:
-  min-battery-capacity-for-loading: 25
-
+  battery:
+    min.capacity.for.loading: 25
+    log.rate: 600000
 ---
 
 spring:

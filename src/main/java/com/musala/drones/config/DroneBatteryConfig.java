@@ -4,10 +4,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
-@ConfigurationProperties(prefix = "drone")
+@ConfigurationProperties(prefix = "drone.battery")
+@EnableScheduling
 @Getter @Setter
-public class DroneConfig {
-    private int minBatteryCapacityForLoading;
+public class DroneBatteryConfig {
+    private int minCapacityForLoading;
 }
