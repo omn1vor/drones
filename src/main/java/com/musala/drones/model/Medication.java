@@ -12,7 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
+@Entity(name = "medications")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Medication {
     @Id @Pattern(regexp = "[A-Z0-9_]+") @Size(max = 100, min = 1) @Column(length = 100)
@@ -21,5 +21,5 @@ public class Medication {
     String name;
     @Min(0)
     int weightGrams;
-    String image;
+    String imageUrl;
 }

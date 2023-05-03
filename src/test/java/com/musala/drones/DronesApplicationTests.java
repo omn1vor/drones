@@ -1,9 +1,10 @@
 package com.musala.drones;
 
+import com.musala.drones.dto.AddMedicationsRowRequestDto;
 import com.musala.drones.dto.DroneDto;
-import com.musala.drones.dto.LoadedMedicationsRowDTO;
 import com.musala.drones.model.DroneModel;
 import com.musala.drones.model.DroneState;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -83,38 +84,74 @@ class DronesApplicationTests {
 	}
 
 	@Test
+	@DirtiesContext
 	void loadDroneCorrectly() {
 		String serial = "MD-001";
-		List<LoadedMedicationsRowDTO> medications = List.of(
-				new LoadedMedicationsRowDTO("ASPIRIN", 3),
-				new LoadedMedicationsRowDTO("CD_1", 3)
+		List<AddMedicationsRowRequestDto> medications = List.of(
+				new AddMedicationsRowRequestDto("ASPIRIN", 3),
+				new AddMedicationsRowRequestDto("CD_1", 3)
 
 		);
 
 		client.post().uri("/drones/%s/load".formatted(serial))
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON)
-				.body(Mono.just(medications), LoadedMedicationsRowDTO.class)
+				.body(Mono.just(medications), AddMedicationsRowRequestDto.class)
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody()
-				.jsonPath("$.serialNumber").isEqualTo(serial);
+				.jsonPath("$.serialNumber").isEqualTo(serial)
+				.jsonPath("$.state").isEqualTo("LOADED");
 	}
 
 	@Test
 	void loadDroneIncorrectly() {
 		String serial = "MD-001a";
-		List<LoadedMedicationsRowDTO> medications = List.of(
-				new LoadedMedicationsRowDTO("ASPIRIN", 20),
-				new LoadedMedicationsRowDTO("CD_1", 5)
+		List<AddMedicationsRowRequestDto> medications = List.of(
+				new AddMedicationsRowRequestDto("ASPIRIN", 20),
+				new AddMedicationsRowRequestDto("CD_1", 5)
 
 		);
 
 		client.post().uri("/drones/%s/load".formatted(serial))
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON)
-				.body(Mono.just(medications), LoadedMedicationsRowDTO.class)
+				.body(Mono.just(medications), AddMedicationsRowRequestDto.class)
 				.exchange()
 				.expectStatus().isBadRequest();
+	}
+
+	@Test
+	void checkLoadedMedications() {
+		client.get().uri("/drones/HV-112312/medications")
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.jsonPath("$").isArray()
+				.jsonPath("$").isNotEmpty()
+                .jsonPath("$.length()").isEqualTo(3)
+                .jsonPath("$[0].medication.code").isEqualTo("ASPIRIN")
+                .jsonPath("$[0].quantity").isEqualTo(2);
+	}
+
+	@Test
+	void checkAvailableDronesForLoading() {
+		client.get().uri("/drones/available")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$").isArray()
+                .jsonPath("$").isNotEmpty()
+				.jsonPath("$.length()").isEqualTo(2)
+                .jsonPath("$[0].serialNumber").isNotEmpty();
+	}
+
+	@Test
+	void checkDroneBatteryLevel() {
+		client.get().uri("/drones/SM-001/battery")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.batteryCapacity").isEqualTo(25);
 	}
 }

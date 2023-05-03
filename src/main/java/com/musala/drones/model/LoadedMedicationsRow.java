@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
+@Entity(name = "loaded_medications_row")
 @Getter @Setter @NoArgsConstructor
 public class LoadedMedicationsRow {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

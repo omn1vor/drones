@@ -56,19 +56,21 @@ public class TestData implements ApplicationRunner {
                 new Drone("MD-001", DroneModel.MIDDLEWEIGHT, 300, 75,
                         DroneState.IDLE),
                 new Drone("MD-001a", DroneModel.MIDDLEWEIGHT, 300, 75,
-                        DroneState.DELIVERING),
+                        DroneState.IDLE),
                 new Drone("SM-001", DroneModel.LIGHTWEIGHT, 100, 25,
-                        DroneState.DELIVERED)
+                        DroneState.IDLE)
         );
 
         drones.get(0).addMedications(aspirin, 2);
         drones.get(0).addMedications(codeine, 2);
         drones.get(0).addMedications(amoxicillin, 2);
+        drones.get(0).setState(DroneState.DELIVERING);
 
         drones.get(2).addMedications(codeine, 3);
         drones.get(2).addMedications(amoxicillin, 2);
 
         drones.get(3).addMedications(aspirin, 3);
+        drones.get(3).setState(DroneState.IDLE);
 
         drones.forEach(droneRepository::save);
     }

@@ -1,9 +1,6 @@
 package com.musala.drones.controller;
 
-import com.musala.drones.exception.DroneNotFoundException;
-import com.musala.drones.exception.DroneOverloadedException;
-import com.musala.drones.exception.ErrorDetails;
-import com.musala.drones.exception.MedicationNotFoundException;
+import com.musala.drones.exception.*;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +17,7 @@ public class RestExceptionHandler {
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler({ConstraintViolationException.class, DroneOverloadedException.class})
+    @ExceptionHandler({ConstraintViolationException.class, DroneOverloadedException.class, DroneStateException.class})
     public ResponseEntity<Object> handleBadRequestException(RuntimeException e, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(e.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);

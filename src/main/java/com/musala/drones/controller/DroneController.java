@@ -1,7 +1,7 @@
 package com.musala.drones.controller;
 
-import com.musala.drones.dto.DroneDto;
-import com.musala.drones.dto.LoadedMedicationsRowDTO;
+import com.musala.drones.dto.*;
+import com.musala.drones.model.LoadedMedicationsRow;
 import com.musala.drones.service.DronesService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/drones")
 @Validated
 public class DroneController {
     DronesService dronesService;
@@ -21,25 +21,40 @@ public class DroneController {
         this.dronesService = dronesService;
     }
 
-    @GetMapping("drones")
+    @GetMapping
     public List<DroneDto> getDrones() {
         return dronesService.getDrones();
     }
 
-    @GetMapping("drones/{serialNumber}")
+    @GetMapping("/{serialNumber}")
     public DroneDto getDrone(@PathVariable @Size(max = 100, min = 1) String serialNumber) {
         return dronesService.getDrone(serialNumber);
     }
 
-    @PostMapping("drones")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void registerDrone(@Valid @RequestBody DroneDto droneDto) {
         dronesService.registerDrone(droneDto);
     }
 
-    @PostMapping("drones/{serialNumber}/load")
+    @PostMapping("/{serialNumber}/load")
     public DroneDto loadMedications(@PathVariable @Size(max = 100, min = 1) String serialNumber,
-                                    @Valid @RequestBody List<LoadedMedicationsRowDTO> loadedMedicationsRowDTOS) {
-        return dronesService.loadMedications(serialNumber, loadedMedicationsRowDTOS);
+                                    @Valid @RequestBody List<AddMedicationsRowRequestDto> addMedicationsRowRequestDtos) {
+        return dronesService.loadMedications(serialNumber, addMedicationsRowRequestDtos);
+    }
+
+    @GetMapping("/{serialNumber}/medications")
+    public List<LoadedMedicationsRowDto> getMedications(@PathVariable @Size(max = 100, min = 1) String serialNumber) {
+        return dronesService.getMedications(serialNumber);
+    }
+
+    @GetMapping("/available")
+    public List<DroneDto> getAvailableDrones() {
+        return dronesService.getAvailableDrones();
+    }
+
+    @GetMapping("/{serialNumber}/battery")
+    public DroneBatteryInfoDto getBatteryLevel(@PathVariable @Size(max = 100, min = 1) String serialNumber) {
+        return dronesService.getBatteryLevel(serialNumber);
     }
 }

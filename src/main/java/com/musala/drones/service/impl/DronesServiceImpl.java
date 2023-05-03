@@ -1,16 +1,16 @@
 package com.musala.drones.service.impl;
 
-import com.musala.drones.dto.DroneDto;
-import com.musala.drones.dto.LoadedMedicationsRowDTO;
-import com.musala.drones.dto.MedicationDto;
-import com.musala.drones.exception.DroneOverloadedException;
+import com.musala.drones.dto.*;
+import com.musala.drones.exception.DroneStateException;
 import com.musala.drones.exception.MedicationNotFoundException;
 import com.musala.drones.model.Drone;
+import com.musala.drones.model.DroneState;
 import com.musala.drones.model.LoadedMedicationsRow;
 import com.musala.drones.model.Medication;
 import com.musala.drones.service.DronesService;
 import com.musala.drones.service.storage.DroneRepository;
 import com.musala.drones.service.storage.MedicationRepository;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -56,21 +56,42 @@ public class DronesServiceImpl implements DronesService {
     }
 
     @Override
-    public DroneDto loadMedications(String serialNumber, List<LoadedMedicationsRowDTO> loadedMedicationsRowDTOS) {
+    @Transactional
+    public DroneDto loadMedications(String serialNumber, List<AddMedicationsRowRequestDto> addMedicationsRowRequestDtos) {
         Drone drone = getDroneBySerialNumber(serialNumber);
+        if (drone.getState() != DroneState.IDLE) {
+            throw new DroneStateException("Drone %s is not in IDLE state. Loading is not possible");
+        }
+        drone.setState(DroneState.LOADING);
+        droneRepository.save(drone);
 
-        List<LoadedMedicationsRow> medications = loadedMedicationsRowDTOS.stream()
+        List<LoadedMedicationsRow> medications = addMedicationsRowRequestDtos.stream()
                 .map(row -> loadedMedicationRowsFromDto(drone, row))
                 .toList();
 
-        if (!drone.addMedications(medications)) {
-            throw new DroneOverloadedException(
-                    ("Too much weight. Drone can carry %d grams, is already carrying %d grams, and you're trying to add" +
-                            "%d grams more")
-                            .formatted(drone.getWeightLimitGrams(), drone.getLoadWeight(), getLoadWeight(medications)));
-        }
+        drone.addMedications(medications);
         droneRepository.saveAndFlush(drone);
         return droneToDto(drone);
+    }
+
+    @Override
+    public List<LoadedMedicationsRowDto> getMedications(String serialNumber) {
+        Drone drone = getDroneBySerialNumber(serialNumber);
+        return drone.getMedications().stream()
+                .map(this::loadedMedicationRowToDto)
+                .toList();
+    }
+
+    @Override
+    public List<DroneDto> getAvailableDrones() {
+        return droneRepository.findAllByState(DroneState.IDLE).stream()
+                .map(this::droneToDto).toList();
+    }
+
+    @Override
+    public DroneBatteryInfoDto getBatteryLevel(String serialNumber) {
+        Drone drone = getDroneBySerialNumber(serialNumber);
+        return modelMapper.map(drone, DroneBatteryInfoDto.class);
     }
 
     private Drone getDroneBySerialNumber(String serialNumber) {
@@ -79,25 +100,29 @@ public class DronesServiceImpl implements DronesService {
                         "Drone with ID %s is not registered".formatted(serialNumber)));
     }
 
-    private int getLoadWeight(List<LoadedMedicationsRow> rows) {
-        return rows.stream()
-                .mapToInt(LoadedMedicationsRow::getWeight)
-                .sum();
-    }
-
     private Drone droneFromDto(DroneDto droneDto) {
         return modelMapper.map(droneDto, Drone.class);
     }
 
     private DroneDto droneToDto(Drone drone) {
-        return modelMapper.map(drone, DroneDto.class);
+        DroneDto droneDto = modelMapper.map(drone, DroneDto.class);
+        droneDto.setMedications(
+                drone.getMedications().stream()
+                .map(this::loadedMedicationRowToDto)
+                        .toList()
+        );
+        return droneDto;
+    }
+
+    private LoadedMedicationsRowDto loadedMedicationRowToDto(LoadedMedicationsRow row) {
+        return modelMapper.map(row, LoadedMedicationsRowDto.class);
     }
 
     private Medication medicationFromDto(MedicationDto medicationDto) {
         return modelMapper.map(medicationDto, Medication.class);
     }
 
-    private LoadedMedicationsRow loadedMedicationRowsFromDto(Drone drone, LoadedMedicationsRowDTO dto) {
+    private LoadedMedicationsRow loadedMedicationRowsFromDto(Drone drone, AddMedicationsRowRequestDto dto) {
         Medication medication = medicationRepository.findById(dto.getCode())
                 .orElseThrow(() -> new MedicationNotFoundException("Medicine with ID %s is not registered"
                         .formatted(dto.getCode())));

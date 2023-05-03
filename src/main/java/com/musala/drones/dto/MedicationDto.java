@@ -24,5 +24,5 @@ public class MedicationDto {
     int weightGrams;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    String image;
+    String imageUrl;
 }

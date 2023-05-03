@@ -1,7 +1,6 @@
 package com.musala.drones.service;
 
-import com.musala.drones.dto.DroneDto;
-import com.musala.drones.dto.LoadedMedicationsRowDTO;
+import com.musala.drones.dto.*;
 
 import java.util.List;
 
@@ -12,5 +11,11 @@ public interface DronesService {
 
     void registerDrone(DroneDto droneDto);
 
-    DroneDto loadMedications(String serialNumber, List<LoadedMedicationsRowDTO> loadedMedicationsRowDTOS);
+    DroneDto loadMedications(String serialNumber, List<AddMedicationsRowRequestDto> addMedicationsRowRequestDtos);
+
+    List<LoadedMedicationsRowDto> getMedications(String serialNumber);
+
+    List<DroneDto> getAvailableDrones();
+
+    DroneBatteryInfoDto getBatteryLevel(String serialNumber);
 }

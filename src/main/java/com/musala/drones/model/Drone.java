@@ -1,5 +1,6 @@
 package com.musala.drones.model;
 
+import com.musala.drones.exception.DroneOverloadedException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -12,7 +13,7 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
+@Entity(name = "drones")
 @Getter @Setter @NoArgsConstructor
 public class Drone {
     @Id @Column(length = 100) @Size(max = 100, min = 1)
@@ -42,20 +43,22 @@ public class Drone {
                 .sum();
     }
 
-    public boolean addMedications(List<LoadedMedicationsRow> newMedications) {
+    public void addMedications(List<LoadedMedicationsRow> newMedications) {
         long totalWeight = newMedications.stream()
                 .mapToInt(LoadedMedicationsRow::getWeight)
                 .sum();
         if (totalWeight + getLoadWeight() > getWeightLimitGrams()) {
-            return false;
+            throw new DroneOverloadedException(
+                    ("Too much weight. Drone can carry %d grams, is already carrying %d grams, and you're trying to add" +
+                            "%d grams more")
+                            .formatted(getWeightLimitGrams(), getLoadWeight(), totalWeight));
         }
-
+        setState(DroneState.LOADED);
         medications.addAll(newMedications);
-        return true;
     }
 
-    public boolean addMedications(Medication medication, int quantity) {
+    public void addMedications(Medication medication, int quantity) {
         LoadedMedicationsRow row = new LoadedMedicationsRow(this, medication, quantity);
-        return addMedications(List.of(row));
+        addMedications(List.of(row));
     }
 }

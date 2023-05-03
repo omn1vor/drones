@@ -31,7 +31,7 @@ public class DroneDto {
     DroneState state;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    List<MedicationDto> medications = new ArrayList<>();
+    List<LoadedMedicationsRowDto> medications = new ArrayList<>();
 
     public DroneDto(String serialNumber, DroneModel model, int weightLimitGrams, int batteryCapacity, DroneState state) {
         this.serialNumber = serialNumber;
